@@ -1,13 +1,43 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { TransactionProvider } from '../contexts/TransactionContext';
+import LoginForm from '../components/auth/LoginForm';
+import Dashboard from '../components/dashboard/Dashboard';
+import Navbar from '../components/layout/Navbar';
+import { Toaster } from '@/components/ui/toaster';
+
+const AppContent = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+      {user ? (
+        <TransactionProvider>
+          <Navbar />
+          <Dashboard />
+        </TransactionProvider>
+      ) : (
+        <LoginForm />
+      )}
+      <Toaster />
+    </div>
+  );
+};
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 
