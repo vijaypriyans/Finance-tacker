@@ -44,7 +44,7 @@ const LoginForm = () => {
   useEffect(() => {
     const checkMongoDBStatus = async () => {
       try {
-        const response = await axios.get('https://finance-tacker.onrender.com/api/health');
+        const response = await axios.get('https://finance-tacker-backend-lh1r.onrender.com/api/health');
         if (response.data.status === 'error') {
           toast({
             title: 'Database Error',
