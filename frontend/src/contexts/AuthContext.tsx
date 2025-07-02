@@ -18,7 +18,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      axios.get('https://finance-tacker.onrender.com/api/user')
+      axios.get('https://finance-tacker-backend-lh1r.onrender.com/api/user')
         .then((response) => setUser(response.data))
         .catch(() => {
           localStorage.removeItem('token');
