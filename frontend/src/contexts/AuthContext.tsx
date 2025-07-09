@@ -14,16 +14,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthContextType['user']>(null);
 
-  // Set axios default headers and fetch user data on mount
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-<<<<<<< HEAD
-      axios.get(`${API_BASE_URL}/api/user`)
-=======
-      axios.get('https://finance-tacker-backend-lh1r.onrender.com/api/user')
->>>>>>> 7463f52c7cf7724893313d1f28a69d869c17e483
+      axios
+        .get(`${API_BASE_URL}/api/user`)
         .then((response) => setUser(response.data))
         .catch(() => {
           localStorage.removeItem('token');
@@ -34,11 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-<<<<<<< HEAD
       const response = await axios.post(`${API_BASE_URL}/api/login`, { email, password });
-=======
-      const response = await axios.post('https://finance-tacker-backend-ybhm.onrender.com/api/login', { email, password });
->>>>>>> 7463f52c7cf7724893313d1f28a69d869c17e483
       localStorage.setItem('token', response.data.token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
       setUser(response.data.user);
@@ -49,11 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string) => {
     try {
-<<<<<<< HEAD
       await axios.post(`${API_BASE_URL}/api/register`, { name, email, password });
-=======
-      await axios.post('https://finance-tacker-backend-ybhm.onrender.com/api/register', { name, email, password });
->>>>>>> 7463f52c7cf7724893313d1f28a69d869c17e483
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Unable to connect to the server.');
     }
