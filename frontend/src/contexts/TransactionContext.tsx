@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
+import { API_BASE_URL } from '../lib/utils';
 
 export interface Transaction {
   _id: string;
@@ -57,7 +58,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (user) {
       const fetchTransactions = async () => {
         try {
-          const response = await axios.get('https://finance-tacker.onrender.com/api/transactions');
+          const response = await axios.get(`${API_BASE_URL}/api/transactions`);
           setTransactions(response.data);
         } catch (error) {
           console.error('Error fetching transactions:', error);
@@ -75,7 +76,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
         ...transaction,
         category: transaction.category || categorizeTransaction(transaction.description),
       };
-      const response = await axios.post('https://finance-tacker.onrender.com/api/transactions', newTransaction);
+      const response = await axios.post(`${API_BASE_URL}/api/transactions`, newTransaction);
       setTransactions((prev) => [response.data, ...prev]);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error adding transaction');
@@ -84,7 +85,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const deleteTransaction = async (id: string) => {
     try {
-      await axios.delete(`https://finance-tacker.onrender.com/api/transactions/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/transactions/${id}`);
       setTransactions((prev) => prev.filter((t) => t._id !== id));
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error deleting transaction');
@@ -93,7 +94,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const updateTransaction = async (id: string, updatedTransaction: Partial<Transaction>) => {
     try {
-      const response = await axios.put(`https://finance-tacker.onrender.com/api/transactions/${id}`, updatedTransaction);
+      const response = await axios.put(`${API_BASE_URL}/api/transactions/${id}`, updatedTransaction);
       setTransactions((prev) =>
         prev.map((t) => (t._id === id ? response.data : t))
       );
