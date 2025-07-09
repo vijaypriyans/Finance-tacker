@@ -1,9 +1,13 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+
+import express from 'express';
+
+import mongoose from 'mongoose';
+import cors from 'cors';
+
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken' ;
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -174,6 +178,6 @@ app.put('/api/transactions/:id', authenticateToken, async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
-  console.log('Server running on port 5000');
-});
+export default function handler(req, res) {
+  res.status(200).json({ message: "Hello from Vercel!" });
+}
