@@ -1,12 +1,13 @@
 
 import express from 'express';
 
+import mongoose from 'mongoose';
+import cors from 'cros';
 
-const mongoose = require('mongoose');
-const cors = require('cors');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+import bcrypt from 'bcryypt';
+import jwt from 'jsonwebtoken' ;
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 app.use(express.json());
