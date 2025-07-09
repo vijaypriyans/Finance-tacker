@@ -1,126 +1,265 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
-import { useAuth } from './AuthContext';
-import { API_BASE_URL } from '../lib/utils';
+import { API_BASE_URL } from '../../lib/utils';
 
-export interface Transaction {
-  _id: string;
-  amount: number;
-  description: string;
-  category: string;
-  date: string;
-  type: 'income' | 'expense';
-}
+const LoginForm = () => {
+  const { login, register } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState('login');
 
-interface TransactionContextType {
-  transactions: Transaction[];
-  addTransaction: (transaction: Omit<Transaction, '_id'>) => Promise<void>;
-  deleteTransaction: (id: string) => Promise<void>;
-  updateTransaction: (id: string, transaction: Partial<Transaction>) => Promise<void>;
-  categorizeTransaction: (description: string) => string;
-}
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
 
-const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
+  const [registerData, setRegisterData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    school: '',
+    phone: '',
+  });
 
-// Smart categorization logic
-const categorizeTransaction = (description: string): string => {
-  const desc = description.toLowerCase();
-  if (desc.includes('grocery') || desc.includes('food') || desc.includes('restaurant') || desc.includes('cafe')) {
-    return 'Food & Dining';
-  }
-  if (desc.includes('gas') || desc.includes('uber') || desc.includes('taxi') || desc.includes('transport')) {
-    return 'Transportation';
-  }
-  if (desc.includes('amazon') || desc.includes('shopping') || desc.includes('store')) {
-    return 'Shopping';
-  }
-  if (desc.includes('netflix') || desc.includes('spotify') || desc.includes('entertainment')) {
-    return 'Entertainment';
-  }
-  if (desc.includes('salary') || desc.includes('paycheck') || desc.includes('income')) {
-    return 'Income';
-  }
-  if (desc.includes('rent') || desc.includes('mortgage') || desc.includes('utilities')) {
-    return 'Housing';
-  }
-  if (desc.includes('doctor') || desc.includes('hospital') || desc.includes('pharmacy')) {
-    return 'Healthcare';
-  }
-  return 'Other';
-};
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const { user } = useAuth();
-
+  // Check MongoDB connection status on mount
   useEffect(() => {
-    if (user) {
-      const fetchTransactions = async () => {
-        try {
-          const response = await axios.get(`${API_BASE_URL}/api/transactions`);
-          setTransactions(response.data);
-        } catch (error) {
-          console.error('Error fetching transactions:', error);
+    const checkMongoDBStatus = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/health`);
+        if (response.data.status === 'error') {
+          toast({
+            title: 'Database Error',
+            description: response.data.message || 'MongoDB is not connected.',
+            variant: 'destructive',
+          });
         }
-      };
-      fetchTransactions();
-    } else {
-      setTransactions([]); // Clear transactions on logout
-    }
-  }, [user]);
+      } catch (error) {
+        toast({
+          title: 'Database Error',
+          description: 'Server is not connect to database. Please try again later.',
+          variant: 'destructive',
+        });
+      }
+    };
 
-  const addTransaction = async (transaction: Omit<Transaction, '_id'>) => {
+    checkMongoDBStatus();
+  }, [toast]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      const newTransaction = {
-        ...transaction,
-        category: transaction.category || categorizeTransaction(transaction.description),
-      };
-      const response = await axios.post(`${API_BASE_URL}/api/transactions`, newTransaction);
-      setTransactions((prev) => [response.data, ...prev]);
+      await login(loginData.email, loginData.password);
+      toast({
+        title: 'Welcome back!',
+        description: "You've successfully logged in.",
+      });
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error adding transaction');
+      toast({
+        title: 'Login failed',
+        description: error.message || 'Unable to connect to the server. Please try again later.',
+        variant: 'destructive',
+        duration: 3000,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const deleteTransaction = async (id: string) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/api/transactions/${id}`);
-      setTransactions((prev) => prev.filter((t) => t._id !== id));
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error deleting transaction');
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    if (registerData.password !== confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
     }
-  };
+    setLoading(true);
 
-  const updateTransaction = async (id: string, updatedTransaction: Partial<Transaction>) => {
     try {
-      const response = await axios.put(`${API_BASE_URL}/api/transactions/${id}`, updatedTransaction);
-      setTransactions((prev) =>
-        prev.map((t) => (t._id === id ? response.data : t))
-      );
+      await register(registerData.name, registerData.email, registerData.password);
+      toast({
+        title: 'Account created!',
+        description: 'Welcome to your personal finance dashboard.',
+      });
+      setLoginData({ email: registerData.email, password: registerData.password });
+      setTab('login');
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error updating transaction');
+      toast({
+        title: 'Registration failed',
+        description: error.message || 'Unable to connect to the server. Please try again later.',
+        variant: 'destructive',
+        duration: 3000,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <TransactionContext.Provider
-      value={{
-        transactions,
-        addTransaction,
-        deleteTransaction,
-        updateTransaction,
-        categorizeTransaction,
-      }}
-    >
-      {children}
-    </TransactionContext.Provider>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600 mb-2">
+            FinanceTracker Pro
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Your intelligent personal finance companion
+          </p>
+        </div>
+
+        <Card className="backdrop-blur-sm bg-white/80 dark:bg-gray-900/80 border-white/20 shadow-xl">
+          <CardHeader>
+            <CardTitle>Get Started</CardTitle>
+            <CardDescription>
+              Sign in to your account or create a new one
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={tab} onValueChange={setTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Register</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="login">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      value={loginData.email}
+                      onChange={(e) =>
+                        setLoginData((prev) => ({ ...prev, email: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="password"
+                      placeholder="Password"
+                      value={loginData.password}
+                      onChange={(e) =>
+                        setLoginData((prev) => ({ ...prev, password: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
+                    disabled={loading}
+                  >
+                    {loading ? 'Signing in...' : 'Sign In'}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="register">
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div>
+                    <Input
+                      type="text"
+                      placeholder="Full Name"
+                      value={registerData.name}
+                      onChange={(e) =>
+                        setRegisterData((prev) => ({ ...prev, name: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="text"
+                      placeholder="School Name"
+                      value={registerData.school}
+                      onChange={(e) =>
+                        setRegisterData((prev) => ({ ...prev, school: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="tel"
+                      placeholder="Phone"
+                      value={registerData.phone}
+                      onChange={(e) =>
+                        setRegisterData((prev) => ({ ...prev, phone: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      value={registerData.email}
+                      onChange={(e) =>
+                        setRegisterData((prev) => ({ ...prev, email: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="password"
+                      placeholder="Password"
+                      value={registerData.password}
+                      onChange={(e) =>
+                        setRegisterData((prev) => ({ ...prev, password: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="password"
+                      placeholder="Confirm Password"
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                    {passwordError && (
+                      <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+                    )}
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
+                    disabled={loading}
+                  >
+                    {loading ? 'Creating account...' : 'Create Account'}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 
-export const useTransactions = () => {
-  const context = useContext(TransactionContext);
-  if (!context) {
-    throw new Error('useTransactions must be used within a TransactionProvider');
-  }
-  return context;
-};
+export default LoginForm;
