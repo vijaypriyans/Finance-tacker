@@ -2,7 +2,7 @@
 import express from 'express';
 
 import mongoose from 'mongoose';
-import cors from 'cros';
+import cors from 'cors';
 
 import bcrypt from 'bcryypt';
 import jwt from 'jsonwebtoken' ;
