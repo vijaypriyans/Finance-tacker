@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../lib/utils';
+
 
 interface AuthContextType {
   user: { id: string; name: string; email: string } | null;
@@ -18,8 +18,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      axios
-        .get(`${API_BASE_URL}/api/user`)
+      axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user`)
         .then((response) => setUser(response.data))
         .catch(() => {
           localStorage.removeItem('token');
@@ -30,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/login`, { email, password });
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/login`, { email, password });
       localStorage.setItem('token', response.data.token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
       setUser(response.data.user);
@@ -41,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      await axios.post(`${API_BASE_URL}/api/register`, { name, email, password });
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/register`, { name, email, password });
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Unable to connect to the server.');
     }
