@@ -2,7 +2,6 @@
 import express from 'express';
 const app = express();
 
-const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
