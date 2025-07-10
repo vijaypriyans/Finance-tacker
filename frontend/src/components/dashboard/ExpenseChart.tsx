@@ -1,14 +1,13 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { useTransactions } from '../../contexts/TransactionContext';
+import { useTransactions } from '../../components/contexts/TransactionContext';
 import BudgetOverview from './BudgetOverview';
 
 const COLORS = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#6B7280'];
 
 const ExpenseChart = () => {
   const { transactions } = useTransactions();
-
   const expensesByCategory = transactions
     .filter(t => t.type === 'expense')
     .reduce((acc, transaction) => {

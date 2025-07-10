@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import { useTransactions } from '../../contexts/TransactionContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useTransactions } from '../contexts/TransactionContext';
+import { useAuth } from '../contexts/AuthContext';
 import { exportTransactionsToPDF } from '../../utils/pdfExport';
 import { useToast } from '@/hooks/use-toast';
 

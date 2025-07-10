@@ -1,12 +1,10 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Transaction } from '../contexts/TransactionContext';
+import { Transaction } from '../components/contexts/TransactionContext';
 
 export const exportTransactionsToPDF = (transactions: Transaction[], userName: string) => {
   const doc = new jsPDF();
-  
-  // Add title
-  doc.setFontSize(20);
+    doc.setFontSize(20);
   doc.text('Personal Finance Report', 20, 30);
   
   // Add user info and date

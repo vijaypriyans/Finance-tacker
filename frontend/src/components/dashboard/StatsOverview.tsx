@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useTransactions } from '../../contexts/TransactionContext';
+import { useTransactions } from '../contexts/TransactionContext';
 
 const StatsOverview = () => {
   const { transactions } = useTransactions();

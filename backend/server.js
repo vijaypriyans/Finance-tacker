@@ -11,7 +11,10 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true
+}));
 
 // Validate MONGO_URI
 if (!process.env.MONGO_URI) {
@@ -176,6 +179,11 @@ app.put('/api/transactions/:id', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: 'Error updating transaction', error: error.message });
   }
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 export default function handler(req, res) {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useTransactions } from '@/contexts/TransactionContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useTransactions } from '@/components/layout/contexts/TransactionContextContext';
+import { useAuth } from '@/components/layout/contexts/AuthContextContext';
 
 const TransactionsPage: React.FC = () => {
   const { transactions, addTransaction, deleteTransaction, updateTransaction, categorizeTransaction } = useTransactions();

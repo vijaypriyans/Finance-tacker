@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useTransactions } from '../../contexts/TransactionContext';
+import { useTransactions } from '../../components/contexts/TransactionContext';
 
 const DEFAULT_BUDGETS = [
   { category: 'Transportation', budget: 200, color: 'bg-blue-500', protected: true },
